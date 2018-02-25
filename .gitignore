@@ -1,0 +1,10 @@
+/node_modules/
+
+# All timestamped static file directories will start with 2 (until the year 3000)
+public/2*
+
+# Built files.
+/build/
+public/src/build
+/timestamp.txt
+/version.txt
