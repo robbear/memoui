@@ -21,7 +21,7 @@ class HomePage extends ElementBase {
   get [symbols.template]() {
     return `
       <div>
-        Sorry, something went wrong. 😞
+        Memoui home page
       </div>
     `;
   }
