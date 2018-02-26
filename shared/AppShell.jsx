@@ -7,7 +7,7 @@ export default class AppShell extends Component {
     //
     // For testing purposes, set minify to false
     //
-    const minify = false;
+    const minify = true;
     
     const clientFile = minify ? 'client.min.js' : 'client.js';
 
