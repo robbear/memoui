@@ -4,7 +4,7 @@ class Settings {
   constructor() {
     this._json = {
       id: SETTINGS_ID,
-      currentTextId: null
+      currentSSJId: null
     };
   }
   
@@ -36,8 +36,8 @@ class Settings {
     this._json.id = value;
   }
 
-  get currentTextId() {
-    return this._json.currentTextId;
+  get currentSSJId() {
+    return this._json.currentSSJId;
   }
   set currentSSJId(value) {
     this._json.currentSSJId = value;
