@@ -85,6 +85,13 @@ class Database {
       
       request.onsuccess = () => {
         this.db = request.result;
+        
+        // BUGBUG - Need better UI by letting the main page handle this.
+        this.db.onversionchange = (event) => {
+          this.close();
+          alert("A new version of this page is ready. Please refresh.");
+        };
+        
         resolve(this.db);
       };
       
@@ -96,6 +103,14 @@ class Database {
         this.db = request.result;
         this.upgradeDatabase(event.oldVersion);
       };
+      
+      request.onblocked = (event) => {
+        // If some other tab is loaded with the database, 
+        // then it needs to be closed before we can proceed.
+        // BUGBUG - need better UI by letting the main page handle this.
+        alert("Please close all other tabs with this site open!");
+      };
+      
     });
 
     return promise;
