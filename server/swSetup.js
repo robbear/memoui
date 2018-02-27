@@ -9,7 +9,6 @@ const promisify = require('util').promisify;
 const readFileAsync = promisify(fs.readFile);
 const writeFileAsync = promisify(fs.writeFile);
 
-
 function updateServiceWorkerVersion() {
   // Default values in case there's no timestamp.txt.
   // In the case of no timestamp.txt, assume we're in a dev build environment
@@ -31,6 +30,10 @@ function updateServiceWorkerVersion() {
     .replace(
       'const SW_CACHE_VERSION = \'0\';',
       `const SW_CACHE_VERSION = \'${pathVal}\';`
+    )
+    .replace(
+      `const preCachedResources = []`,
+      `const preCachedResources = [ '/', '/version', \'static/${pathVal}/build/client.min.js\', \'static/${pathVal}/main.css\' ]`
     );
 
     return writeFileAsync(swPath, fileContents, 'utf-8');    

@@ -1,7 +1,8 @@
-// DO NOT MODIFY THE FOLLOWING LINE
+// DO NOT MODIFY THE FOLLOWING TWO LINES
 const SW_CACHE_VERSION = '0';
+const preCachedResources = [];
 
-const preCachedResources = [];  // [ '/', '/version' ];
+const cacheName = `memoui-${SW_CACHE_VERSION}`;
 
 /* global URL */
 /* global fetch */
@@ -37,7 +38,7 @@ self.addEventListener('install', event => {
   }
 
   event.waitUntil(
-    caches.open(SW_CACHE_VERSION)
+    caches.open(cacheName)
     .then(cache => {
       return cache.addAll(preCachedResources);
     })
@@ -60,8 +61,8 @@ self.addEventListener('activate', event => {
     .then(keys => {
       return Promise.all(
         keys.filter(key => {
-          // Filter by keys that don't start with the latest version prefix.
-          return !key.startsWith(SW_CACHE_VERSION);
+          // Filter by keys that don't start with the latest named cache.
+          return !key.startsWith(cacheName);
         })
         .map(key => {
           // Return a promise that's fulfilled
@@ -83,7 +84,7 @@ self.addEventListener('fetch', event => {
   function addToCache(request, response) {
     if (response.ok) {
       let copy = response.clone();
-      caches.open(SW_CACHE_VERSION).then(cache => {
+      caches.open(cacheName).then(cache => {
         cache.put(request, copy);
       });
     }
@@ -149,7 +150,7 @@ self.addEventListener('message', event => {
 
   switch (event.data.action) {
     case 'GET_VERSION':
-      event.ports[0].postMessage(SW_CACHE_VERSION);
+      event.ports[0].postMessage(cacheName);
       return;
 
     default:
