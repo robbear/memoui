@@ -153,6 +153,15 @@ version.getVersionInfo()
           0 :
           1000*60*60*24*365;
   app.use(logicalPath, express.static(path.join(__dirname, filePath), {maxAge: `${staticCacheTime}`}));
+
+  app.get('/service-worker.js', (request, response, next) => {
+    response.set({
+      'Content-Type': 'application/javascript',
+      'Cache-Control': 'no-cache'
+    });
+    
+    response.sendFile(path.join(__dirname, `../public/${versionInfo.build}/service-worker.js`));
+  });
 })
 .then(() => {
   //

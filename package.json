@@ -34,10 +34,9 @@
     "webpack-node-externals": "1.6.0"
   },
   "scripts": {
-    "build": "webpack && node server/buildVersion.js && node server/copyStatic.js",
-    "devbuild": "webpack && rm -f timestamp.txt && node server/copyStatic",
+    "build": "webpack && node server/buildVersion.js && node server/copyStatic.js && node server/swSetup.js",
     "lint": "eslint .",
-    "postinstall": "webpack && node server/buildVersion.js && node server/copyStatic.js",
+    "postinstall": "webpack && node server/buildVersion.js && node server/copyStatic.js && node server/swSetup.js",
     "start": "node server/app.js",
     "watch": "webpack --watch"
   },

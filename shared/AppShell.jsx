@@ -39,6 +39,13 @@ export default class AppShell extends Component {
         document.write('<script src="/polyfills/webcomponents-lite.js"><\\/script>');
       }`;
       
+    const serviceWorkerScript = `
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js', {scope: '/'});
+        });
+      }`;
+      
     return (
       <html lang="en">
         <head>
@@ -48,12 +55,14 @@ export default class AppShell extends Component {
           <script dangerouslySetInnerHTML={{__html: polyfillLoader}} charSet="UTF-8"/>
           <link rel="shortcut icon" href={`${staticPath}/images/favicon.ico`}/>
           <link rel="stylesheet" href={`${staticPath}/main.css`}/>
+          <link rel="manifest" href={`${staticPath}/manifest.json`} />
           <script src={`${staticPath}/build/${clientFile}`}></script>
         </head>
         <body>
           <div id="root">
             {props.children}
           </div>
+          <script dangerouslySetInnerHTML={{__html: serviceWorkerScript}} charSet="UTF-8"/>
           <script dangerouslySetInnerHTML={{__html: analyticsScript}} charSet="UTF-8"/>
         </body>
       </html>
