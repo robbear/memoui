@@ -51,6 +51,9 @@ export default class AppShell extends Component {
           <script dangerouslySetInnerHTML={{__html: analyticsScript}} charSet="UTF-8"/>
           <meta charset="utf-8"/>
           <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+          <meta name="theme-color" content="#eeeeee"/>
+          <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+          <meta name="description" content="Memoui is an offline-capable scratch pad progressive web application using Elix.org web components."/>
           <title>{titleBar}</title>
           <script dangerouslySetInnerHTML={{__html: polyfillLoader}} charSet="UTF-8"/>
           <link rel="shortcut icon" href={`${staticPath}/images/favicon.ico`}/>

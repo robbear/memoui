@@ -1,6 +1,8 @@
 {
-  "name": "memoui",
-  "short_name": "memoui",
+  "name": "Memoui",
+  "short_name": "Memoui",
+  "background_color": "#EEEEEE",
+  "theme_color": "#EEEEEE",
   "icons": [
     {
       "src": "images/app_icon-144.png",
