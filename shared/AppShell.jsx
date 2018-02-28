@@ -62,6 +62,10 @@ export default class AppShell extends Component {
           <script src={`${staticPath}/build/${clientFile}`}></script>
         </head>
         <body>
+          <noscript>
+            This application requires JavaScript in order to run on your
+            browser. Please configure your browser to allow JavaScript.
+          </noscript>
           <div id="root">
             {props.children}
           </div>
