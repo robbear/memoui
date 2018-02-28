@@ -75,9 +75,7 @@ class HomePage extends ElementBase {
       }
     });
     
-    // BUGBUG: This works around not getting the event on this.$.tabs
-    // Checking with Jan
-    this.$.tabs.$.tabStrip.addEventListener('selected-index-changed', event => {
+    this.$.tabs.addEventListener('selected-index-changed', event => {
       this.currentTabIndex = event.detail.selectedIndex;
     });
 

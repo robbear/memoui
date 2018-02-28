@@ -20,7 +20,7 @@
     "clooneyjs": "0.6.0",
     "compression": "1.7.1",
     "del": "2.2.2",
-    "elix": "1.0.0",
+    "elix": "elix/elix#master",
     "eslint": "4.9.0",
     "express": "4.14.0",
     "fs-extra": "2.1.2",
