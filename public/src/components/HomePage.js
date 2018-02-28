@@ -240,12 +240,12 @@ class HomePage extends ElementBase {
         }
         .textarea {
           padding: 10px;
-        align-items: center;
-        background: initial;
-        color: initial;
-        display: flex;
-        flex: 1;
-        justify-content: center;
+          align-items: center;
+          background: initial;
+          color: initial;
+          display: flex;
+          flex: 1;
+          justify-content: center;
           font: 400 14px system-ui;
         }
       </style>
