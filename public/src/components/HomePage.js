@@ -247,6 +247,7 @@ class HomePage extends ElementBase {
           flex: 1;
           justify-content: center;
           font: 400 14px system-ui;
+          resize: none;
         }
       </style>
       <elix-tabs id="tabs" class="toolbarTabs" tab-position="bottom" tab-align="stretch">
