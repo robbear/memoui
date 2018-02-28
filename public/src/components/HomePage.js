@@ -244,7 +244,8 @@ class HomePage extends ElementBase {
           display: flex;
           flex: 1;
           justify-content: center;
-          font: 400 14px system-ui;
+          font-family: inherit;
+          font-size: inherit;
           resize: none;
         }
       </style>
