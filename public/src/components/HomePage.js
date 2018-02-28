@@ -1,4 +1,5 @@
 import ElementBase from 'elix/src/ElementBase.js';
+import 'elix/src/Tabs.js';
 import * as symbols from 'elix/src/symbols.js';
 import { merge } from 'elix/src/updates.js';
 import Database from '../utilities/Database.js';
@@ -50,8 +51,9 @@ class HomePage extends ElementBase {
   get defaultState() {
     return Object.assign({}, super.defaultState, {
       appReady: false,
-      currentSlideIndex: -1,
-      forcedUpdateIndex: 0
+      currentTabIndex: 0,
+      forcedUpdateIndex: 0,
+      noteTitles: ['Home', 'Work', 'Misc']
     });
   }
   
@@ -64,10 +66,21 @@ class HomePage extends ElementBase {
       this.appReady = false;
     });
     
-    this.$.textArea.addEventListener('keyup', event => {
-      this._ssj.slides[this._ssj.order[0]].text = this.$.textArea.value;
-      this._dirty = true;
+    this.$.tabs.addEventListener('keyup', event => {
+      const target = event.target;
+      
+      if (target.classList.contains('textarea')) {
+        this._ssj.slides[this._ssj.order[this.currentTabIndex]].text = target.value;
+        this._dirty = true;
+      }
     });
+    
+    // BUGBUG: This works around not getting the event on this.$.tabs
+    // Checking with Jan
+    this.$.tabs.$.tabStrip.addEventListener('selected-index-changed', event => {
+      this.currentTabIndex = event.detail.selectedIndex;
+    });
+
   }
   
   // Returns a promise
@@ -87,30 +100,63 @@ class HomePage extends ElementBase {
     .then(settings => {
       this._settings = settings;
       if (this._settings.currentSSJId) {
+        //
+        // This is the existing database workflow
+        //
         return this._database.loadSSJ(this._settings.currentSSJId)
         .then(ssjRet => {
           this._ssj = ssjRet;
+          
+          // Handle upgrades where we have more tabs
+          const newSlideCapacity = this.noteTitles.length;
+          const oldSlideCapacity = this._ssj.order.length;
+          if (newSlideCapacity > oldSlideCapacity) {
+            console.log('*** Updating to accomodate more tabs');
+            const startIndex = newSlideCapacity - oldSlideCapacity - 1;
+            for (let i = startIndex; i < newSlideCapacity; i++) {
+              const slideId = uuidv4();
+              this._ssj.order.push(slideId);
+              this._ssj.slides[slideId] = { title: this.noteTitles[i], text: null };
+            }
+          }
+          else if (newSlideCapacity < oldSlideCapacity) {
+            console.log('*** Updating to accomodate fewer tabs by deleting data');
+            const slidesToDelete = oldSlideCapacity - newSlideCapacity;
+            for (let i = 0; i < slidesToDelete; i++) {
+              const length = this._ssj.order.length;
+              const slideId = this._ssj.order[length - 1];
+              this._ssj.slides.delete(slideId);
+              this._ssj.order.pop();
+            }
+          }
         });
       }
       else {
+        //
+        // This is the OOBE workflow
+        //
         this._settings.currentSSJId = uuidv4();
         this._ssj = new SlideShowJSON(
           this._settings.currentSSJId, 
           null, 
           null, 
           SlideShowJSON.SlideShowJSONVersion);
-          
-        const slideId = uuidv4();
-        this._ssj.order.push(slideId);
-        this._ssj.slides[slideId] = { text: null };
+        
+        this.noteTitles.forEach(noteTitle => {
+          const slideId = uuidv4();
+          this._ssj.order.push(slideId);
+          this._ssj.slides[slideId] = { title: noteTitle, text: null };
+        });
 
         return this._database.saveOOBE(this._settings, this._ssj);
       }
     })
     .then(() => {
       if(D)console.log('App ready');
-      const text = this._ssj.getSlideJSONByIndex(0).text;
-      this.$.textArea.value = text;
+      this.noteTitles.forEach((noteTitle, index) => {
+        const text = this._ssj.getSlideJSONByIndex(index).text;
+        this.$[`textArea${index}`].value = text;
+      });
       this.appReady = true;
 
       this.startSaveTimer();
@@ -129,11 +175,18 @@ class HomePage extends ElementBase {
     this.setState({appReady});
   }
   
-  get currentSlideIndex() {
-    return this.state.currentSlideIndex;
+  get currentTabIndex() {
+    return this.state.currentTabIndex;
   }
-  set currentSlideIndex(currentSlideIndex) {
-    this.setState({currentSlideIndex});
+  set currentTabIndex(currentTabIndex) {
+    this.setState({currentTabIndex});
+  }
+  
+  get noteTitles() {
+    return this.state.noteTitles;
+  }
+  set noteTitles(noteTitles) {
+    this.setState({noteTitles});
   }
   
   //
@@ -142,36 +195,68 @@ class HomePage extends ElementBase {
   forceUpdate() {
     this.setState({forceUpdateIndex: this.state.forceUpdateIndex + 1});
   }
-
-  get updates() {
+  
+  [symbols.render]() {
+    if (super[symbols.render]) { super[symbols.render](); }
+    
     const textAreaEnabled = this.appReady;
     
+    this.noteTitles.forEach((noteTitle, index) => {
+      this.$[`textArea${index}`].disabled = !textAreaEnabled;
+    });
+  }
+  
+  get updates() {
+
     return merge(super.updates, {
-      $: {
-        textArea: {
-          disabled: !textAreaEnabled
-        }
-      }
     });
   }
   
   get [symbols.template]() {
+    let textAreaHTML = '';
+    let toolbarHTML = '';
+    
+    this.noteTitles.forEach((noteTitle, index) => {
+      textAreaHTML += `<textarea id="textArea${index}"" class="textarea" placeholder="Just start typing. Your text will be saved." autofocus></textarea>`;
+      toolbarHTML += `
+        <memoui-toolbar-tab slot="tabButtons" aria-label="${noteTitle}">
+          <div class="tabTitle">${noteTitle}</div>
+        </memoui-toolbar-tab>`;
+    });
+    
     return `
       <style>
         :host {
         }
-        #textArea {
-          padding: 10px;
-          width: 100%;
+        .tabTitle {
+          padding: 20px;
+        }
+        .toolbarTabs {
+          background: #eee;
+          color: gray;
+          display: flex;
+          flex: 1;
           height: 100%;
+        }
+        .textarea {
+          padding: 10px;
+        align-items: center;
+        background: initial;
+        color: initial;
+        display: flex;
+        flex: 1;
+        justify-content: center;
           font: 400 14px system-ui;
         }
       </style>
-      <textarea 
-        id="textArea"
-        placeholder="Just start typing. Your text will be saved."
-        audofocus 
-      ></textarea>
+      <elix-tabs id="tabs" class="toolbarTabs" tab-position="bottom" tab-align="stretch">
+  
+        ${toolbarHTML}
+
+        ${textAreaHTML}
+        
+      </elix-tabs>
+      
     `;
   }
   

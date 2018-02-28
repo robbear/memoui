@@ -5,9 +5,10 @@ export default class AppShell extends Component {
 
   render(props) {
     //
-    // For testing purposes, set minify to false
+    // For testing purposes, set minify and/or useSW to false
     //
     const minify = true;
+    const useSW = true;
     
     const clientFile = minify ? 'client.min.js' : 'client.js';
 
@@ -39,12 +40,12 @@ export default class AppShell extends Component {
         document.write('<script src="/polyfills/webcomponents-lite.js"><\\/script>');
       }`;
       
-    const serviceWorkerScript = `
+    const serviceWorkerScript = useSW ? `
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/service-worker.js', {scope: '/'});
         });
-      }`;
+      }` : '';
       
     return (
       <html lang="en">
