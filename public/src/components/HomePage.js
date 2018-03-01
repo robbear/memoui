@@ -29,7 +29,7 @@ class HomePage extends ElementBase {
     return Object.assign({}, super.defaultState, {
       appReady: false,
       currentTabIndex: 0,
-      noteTitles: ['Home', 'Work', 'Misc']
+      tabTitles: ['Home', 'Work', 'Misc']
     });
   }
 
@@ -54,13 +54,9 @@ class HomePage extends ElementBase {
     
     this.$.tabs.addEventListener('selected-index-changed', event => {
       const selectedIndex = event.detail.selectedIndex;
-      
-      if (this._ssj) {
-        this._ssj.currentSlideIndex = selectedIndex;
-      }
-      this.currentTabIndex = selectedIndex;
-      
-      if (this.appReady) {
+
+      if (this.currentTabIndex !== selectedIndex) {      
+        this.currentTabIndex = selectedIndex;
         this._dirty = true;
       }
     });
@@ -69,8 +65,9 @@ class HomePage extends ElementBase {
 
   /**
    * Checks after a timeout whether the dirty flag
-   * is set, indicating that the SSJ needs to be saved. It will then
-   * clear the dirty flag. In all cases, a new timer is kicked off.
+   * is set, indicating that the SSJ needs to be saved. If dirty,
+   * it will snapshot the SSJ json, taking a copy and saving it.
+   * The dirty flag is cleared after the snapshot, and before the save.
    */
   startSaveTimer() {
     if(D)console.log('startSaveTimer');
@@ -79,17 +76,32 @@ class HomePage extends ElementBase {
     setTimeout(() => {
       if (self._dirty) {
         if(D)console.log('Dirty bit set, so saving');
-        self._database.saveSSJ(self._ssj)
+        
+        // Capture the state of the currentSlideIndex so we can restore
+        // to the last tab the user was viewing upon reload
+        self._ssj.currentSlideIndex = this.currentTabIndex;
+        
+        // Snapshot a copy of the ssj json and save it
+        const json = self._ssj.copyJson();
+        self._dirty = false;
+        self._database.saveSSJ(json)
         .then(() => {
-          self._dirty = false;
+          // Start a new timer
           self.startSaveTimer();
         })
         .catch(error => {
           console.error(`Error saving ssj: ${error}`);
+          
+          // On an error, turn the dirty flag back on so we try a save
+          // on the next timeout.
+          self._dirty = true;
+          
           self.startSaveTimer();
         });
       }
       else {
+        // Start a new timer in the case where we didn't have
+        // a save to perform
         self.startSaveTimer();
       }
     }, SAVE_INTERVAL);
@@ -128,8 +140,12 @@ class HomePage extends ElementBase {
     .then(() => {
       this.populateTextareas();
       
+      //
+      // Restore the Tabs element to the last viewed tab
+      //
       const currentIndex = this._ssj.currentSlideIndex;
       this.$.tabs.selectedIndex = currentIndex ? currentIndex : 0;
+      this.currentTabIndex = this.$.tabs.selectedIndex;
       
       if(D)console.log('App ready');
       this.appReady = true;
@@ -163,7 +179,7 @@ class HomePage extends ElementBase {
       // Handle upgrades where we have more tabs in this version
       // than the previous version when the ssj was saved.
       //
-      const newTabCapacity = this.noteTitles.length;
+      const newTabCapacity = this.tabTitles.length;
       const oldTabCapacity = this._ssj.order.length;
       if (newTabCapacity > oldTabCapacity) {
         if(D)console.log('*** Updating to accomodate more tabs');
@@ -171,7 +187,7 @@ class HomePage extends ElementBase {
         for (let i = startIndex; i < newTabCapacity; i++) {
           const slideId = uuidv4();
           this._ssj.order.push(slideId);
-          this._ssj.slides[slideId] = { title: this.noteTitles[i], text: null };
+          this._ssj.slides[slideId] = { title: this.tabTitles[i], text: null };
         }
       }
       else if (newTabCapacity < oldTabCapacity) {
@@ -202,10 +218,10 @@ class HomePage extends ElementBase {
       0,
       SlideShowJSON.SlideShowJSONVersion);
     
-    this.noteTitles.forEach(noteTitle => {
+    this.tabTitles.forEach(tabTitle => {
       const slideId = uuidv4();
       this._ssj.order.push(slideId);
-      this._ssj.slides[slideId] = { title: noteTitle, text: null };
+      this._ssj.slides[slideId] = { title: tabTitle, text: null };
     });
 
     return this._database.saveOOBE(this._settings, this._ssj);
@@ -216,7 +232,7 @@ class HomePage extends ElementBase {
    * from the database.
    */
   populateTextareas() {
-    this.noteTitles.forEach((noteTitle, index) => {
+    this.tabTitles.forEach((tabTitle, index) => {
       const text = this._ssj.getSlideJSONByIndex(index).text;
       this.$[`textArea${index}`].value = text;
     });
@@ -242,11 +258,11 @@ class HomePage extends ElementBase {
     this.setState({currentTabIndex});
   }
   
-  get noteTitles() {
-    return this.state.noteTitles;
+  get tabTitles() {
+    return this.state.tabTitles;
   }
-  set noteTitles(noteTitles) {
-    this.setState({noteTitles});
+  set tabTitles(tabTitles) {
+    this.setState({tabTitles});
   }
 
   /**
@@ -258,7 +274,7 @@ class HomePage extends ElementBase {
     
     const textAreaEnabled = this.appReady;
     
-    this.noteTitles.forEach((noteTitle, index) => {
+    this.tabTitles.forEach((tabTitle, index) => {
       this.$[`textArea${index}`].disabled = !textAreaEnabled;
     });
   }
@@ -273,11 +289,11 @@ class HomePage extends ElementBase {
     let textAreaHTML = '';
     let toolbarHTML = '';
     
-    this.noteTitles.forEach((noteTitle, index) => {
+    this.tabTitles.forEach((tabTitle, index) => {
       textAreaHTML += `<textarea id="textArea${index}"" class="textarea" placeholder="Just start typing. Your text will be saved." autofocus></textarea>`;
       toolbarHTML += `
-        <memoui-toolbar-tab slot="tabButtons" aria-label="${noteTitle}">
-          <div class="tabTitle">${noteTitle}</div>
+        <memoui-toolbar-tab slot="tabButtons" aria-label="${tabTitle}">
+          <div class="tabTitle">${tabTitle}</div>
         </memoui-toolbar-tab>`;
     });
     
