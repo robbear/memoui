@@ -53,7 +53,16 @@ class HomePage extends ElementBase {
     });
     
     this.$.tabs.addEventListener('selected-index-changed', event => {
-      this.currentTabIndex = event.detail.selectedIndex;
+      const selectedIndex = event.detail.selectedIndex;
+      
+      if (this._ssj) {
+        this._ssj.currentSlideIndex = selectedIndex;
+      }
+      this.currentTabIndex = selectedIndex;
+      
+      if (this.appReady) {
+        this._dirty = true;
+      }
     });
 
   }
@@ -118,6 +127,9 @@ class HomePage extends ElementBase {
     })
     .then(() => {
       this.populateTextareas();
+      
+      const currentIndex = this._ssj.currentSlideIndex;
+      this.$.tabs.selectedIndex = currentIndex ? currentIndex : 0;
       
       if(D)console.log('App ready');
       this.appReady = true;
@@ -186,7 +198,8 @@ class HomePage extends ElementBase {
     this._ssj = new SlideShowJSON(
       this._settings.currentSSJId, 
       null, 
-      null, 
+      null,
+      0,
       SlideShowJSON.SlideShowJSONVersion);
     
     this.noteTitles.forEach(noteTitle => {

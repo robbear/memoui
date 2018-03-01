@@ -18,6 +18,7 @@ const SSJ_VERSION = 1;
  *    id: {string}
  *    title: {string}
  *    description: {string}
+ *    currentSlideIndex: {number}
  *    version: {number}
  *    order: string[]  // Ordered array of slideIds
  *    slides: {
@@ -36,11 +37,12 @@ const SSJ_VERSION = 1;
  */
 
 class SlideShowJSON {
-  constructor(id, title, description, version) {
+  constructor(id, title, description, currentSlideIndex, version) {
     this._json = {
       id: id ? id : uuidv4(),
       title: title ? title : null,
       description: description ? description : null,
+      currentSlideIndex: currentSlideIndex ? currentSlideIndex : 0,
       version: version,
       order: [],
       slides: {}
@@ -48,7 +50,7 @@ class SlideShowJSON {
   }
   
   static createFromJSON(json) {
-    let ssj = new SlideShowJSON(null, null, null, null);
+    let ssj = new SlideShowJSON(null, null, null, null, null);
 
     if (json) {
       ssj.json = json;
@@ -78,6 +80,13 @@ class SlideShowJSON {
 
   get description() {
     return this._json.description;
+  }
+  
+  get currentSlideIndex() {
+    return this._json.currentSlideIndex;
+  }
+  set currentSlideIndex(currentSlideIndex) {
+    this._json.currentSlideIndex = currentSlideIndex;
   }
 
   get version() {
