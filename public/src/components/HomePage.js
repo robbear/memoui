@@ -1,4 +1,5 @@
 import ElementBase from 'elix/src/ElementBase.js';
+import 'elix/src/Drawer.js';
 import 'elix/src/Tabs.js';
 import * as symbols from 'elix/src/symbols.js';
 import { merge } from 'elix/src/updates.js';
@@ -52,6 +53,10 @@ class HomePage extends ElementBase {
       }
     });
     
+    this.$.tabs.addEventListener('dblclick', event => {
+      this.$.drawer.open();
+    });
+    
     this.$.tabs.addEventListener('selected-index-changed', event => {
       const selectedIndex = event.detail.selectedIndex;
 
@@ -61,6 +66,32 @@ class HomePage extends ElementBase {
       }
     });
 
+    //
+    // Watch for clicks on the Share link in the drawer
+    //
+    this.$.drawer.addEventListener('click', event => {
+      const target = event.target;
+      
+      if (target.id === 'shareLink') {
+        const text = this._ssj.getSlideJSONByIndex(this.currentTabIndex).text;
+        
+        if (text && text.length > 0 && window.navigator.share) {
+  
+          window.navigator.share({
+            title: 'A note from Memoui',
+            text: text,
+            url: 'https://memoui.com'
+          })
+          .catch((error) => {
+            console.error(`Error sharing: ${error}`);
+          });      
+        
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      }
+    });
+    
   }
 
   /**
@@ -280,8 +311,19 @@ class HomePage extends ElementBase {
   }
   
   get updates() {
+    const canShare = window.share ? true : false;
 
+    // BUGBUG - How do we do this?
     return merge(super.updates, {
+      $: {
+        drawer: {
+            shareItem: {
+              styles: {
+                display: canShare ? '' : 'none'
+              }
+            }
+        }
+      }
     });
   }
   
@@ -300,6 +342,15 @@ class HomePage extends ElementBase {
     return `
       <style>
         :host {
+        }
+        #drawer div {
+          margin: 2em;
+        }
+        #drawer ul {
+          list-style: none;
+        }
+        #drawer li {
+          margin: 10px 10px;
         }
         .tabTitle {
           padding: 20px;
@@ -331,7 +382,20 @@ class HomePage extends ElementBase {
         ${textAreaHTML}
         
       </elix-tabs>
-      
+      <elix-drawer id="drawer" class="showDrawer">
+        <div>
+          <h3>Memoui</h3>
+          <h4>by Component Kitchen</h4>
+          <ul>
+            <li id="shareItem">
+              <a href="#" id="shareLink">Share</h>
+            </li>
+            <li>
+              <a href="/version">Version</a>
+            </li>
+          </ul>
+        </div>
+      </elix-drawer>
     `;
   }
   

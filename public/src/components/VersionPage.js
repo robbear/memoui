@@ -69,6 +69,9 @@ class VersionPage extends ElementBase {
         <div id="version"></div>
         <div id="swVersion"></div>
       </div>
+      <div>
+        <a href="/">Back to the application</a>
+      </div>
     `;
   }
 }
