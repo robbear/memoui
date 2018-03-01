@@ -220,9 +220,12 @@ class Database {
   }
 
   //
-  // Save the SSJ object to the ssjs store. Serializes the object
-  // to a JSON document prior to saving. Returns a promise.
   //
+  /**
+   * Save the SSJ object to the ssjs store.
+   * 
+   * Returns a promise
+   */
   saveSSJ(ssj) {
     // Allow passing in either the SSJ object itself, or its json
     const json = ssj.json ? ssj.json : ssj;

@@ -9,7 +9,9 @@ import uuidv4 from '../utilities/Uuidv4.js';
 const SSJ_VERSION = 1;
 const SAVE_INTERVAL = 3000; // 3 seconds
 
-// Set to false to turn off diagnostics output
+/**
+ * Set to false to turn off diagnostics output
+ */
 const D = false;
 
 class HomePage extends ElementBase {
@@ -21,9 +23,46 @@ class HomePage extends ElementBase {
     this._ssj = null;
     this._database = null;
     this._dirty = false;
-    this._lastSave = null;
   }
   
+  get defaultState() {
+    return Object.assign({}, super.defaultState, {
+      appReady: false,
+      currentTabIndex: 0,
+      noteTitles: ['Home', 'Work', 'Misc']
+    });
+  }
+
+  componentDidMount() {
+    if (super.componentDidMount) { super.componentDidMount(); }
+
+    this.initializeFromDatabase()
+    .catch(error => {
+      console.error(`Call from initializeFromDatabase leaked error: ${error}`);
+      this.appReady = false;
+    });
+    
+    this.$.tabs.addEventListener('keyup', event => {
+      const target = event.target;
+      
+      if (target.classList.contains('textarea')) {
+        let slide = this._ssj.getSlideJSONByIndex(this.currentTabIndex);
+        slide.text = target.value;
+        this._dirty = true;
+      }
+    });
+    
+    this.$.tabs.addEventListener('selected-index-changed', event => {
+      this.currentTabIndex = event.detail.selectedIndex;
+    });
+
+  }
+
+  /**
+   * Checks after a timeout whether the dirty flag
+   * is set, indicating that the SSJ needs to be saved. It will then
+   * clear the dirty flag. In all cases, a new timer is kicked off.
+   */
   startSaveTimer() {
     if(D)console.log('startSaveTimer');
     let self = this;
@@ -47,41 +86,14 @@ class HomePage extends ElementBase {
     }, SAVE_INTERVAL);
     
   }
-  
-  get defaultState() {
-    return Object.assign({}, super.defaultState, {
-      appReady: false,
-      currentTabIndex: 0,
-      forcedUpdateIndex: 0,
-      noteTitles: ['Home', 'Work', 'Misc']
-    });
-  }
-  
-  componentDidMount() {
-    if (super.componentDidMount) { super.componentDidMount(); }
 
-    this.initializeFromDatabase()
-    .catch(error => {
-      console.error(`Call from initializeFromDatabase leaked error: ${error}`);
-      this.appReady = false;
-    });
-    
-    this.$.tabs.addEventListener('keyup', event => {
-      const target = event.target;
-      
-      if (target.classList.contains('textarea')) {
-        this._ssj.slides[this._ssj.order[this.currentTabIndex]].text = target.value;
-        this._dirty = true;
-      }
-    });
-    
-    this.$.tabs.addEventListener('selected-index-changed', event => {
-      this.currentTabIndex = event.detail.selectedIndex;
-    });
-
-  }
-  
-  // Returns a promise
+  /**
+   * Initializes the application by opening the database and either retrieving
+   * existing data, or recognizing the "Out Of Box Experience" (OOBE), creating
+   * the new database and initializing values.
+   * 
+   * Returns a promise.
+   */
   initializeFromDatabase() {
     let promise;
     if (!this._database) {
@@ -98,65 +110,19 @@ class HomePage extends ElementBase {
     .then(settings => {
       this._settings = settings;
       if (this._settings.currentSSJId) {
-        //
-        // This is the existing database workflow
-        //
-        return this._database.loadSSJ(this._settings.currentSSJId)
-        .then(ssjRet => {
-          this._ssj = ssjRet;
-          
-          // Handle upgrades where we have more tabs
-          const newSlideCapacity = this.noteTitles.length;
-          const oldSlideCapacity = this._ssj.order.length;
-          if (newSlideCapacity > oldSlideCapacity) {
-            console.log('*** Updating to accomodate more tabs');
-            const startIndex = newSlideCapacity - oldSlideCapacity - 1;
-            for (let i = startIndex; i < newSlideCapacity; i++) {
-              const slideId = uuidv4();
-              this._ssj.order.push(slideId);
-              this._ssj.slides[slideId] = { title: this.noteTitles[i], text: null };
-            }
-          }
-          else if (newSlideCapacity < oldSlideCapacity) {
-            console.log('*** Updating to accomodate fewer tabs by deleting data');
-            const slidesToDelete = oldSlideCapacity - newSlideCapacity;
-            for (let i = 0; i < slidesToDelete; i++) {
-              const length = this._ssj.order.length;
-              const slideId = this._ssj.order[length - 1];
-              this._ssj.slides.delete(slideId);
-              this._ssj.order.pop();
-            }
-          }
-        });
+        return this.populateSSJFromDatabase();
       }
       else {
-        //
-        // This is the OOBE workflow
-        //
-        this._settings.currentSSJId = uuidv4();
-        this._ssj = new SlideShowJSON(
-          this._settings.currentSSJId, 
-          null, 
-          null, 
-          SlideShowJSON.SlideShowJSONVersion);
-        
-        this.noteTitles.forEach(noteTitle => {
-          const slideId = uuidv4();
-          this._ssj.order.push(slideId);
-          this._ssj.slides[slideId] = { title: noteTitle, text: null };
-        });
-
-        return this._database.saveOOBE(this._settings, this._ssj);
+        return this.initializeOOBE();
       }
     })
     .then(() => {
+      this.populateTextareas();
+      
       if(D)console.log('App ready');
-      this.noteTitles.forEach((noteTitle, index) => {
-        const text = this._ssj.getSlideJSONByIndex(index).text;
-        this.$[`textArea${index}`].value = text;
-      });
       this.appReady = true;
 
+      // Start the perpetual timer loop for detecting the dirty flag
       this.startSaveTimer();
     })
     .catch(error => {
@@ -165,6 +131,89 @@ class HomePage extends ElementBase {
       this.appReady = false;
     });
   }
+  
+  /**
+   * Loads an existing SSJ from the database and adjusts the
+   * slides in the SSJ if there's been a change in the number of
+   * tabs we support.
+   * 
+   * Returns a promise.
+   */
+  populateSSJFromDatabase() {
+    //
+    // This is the database-exists workflow
+    //
+    return this._database.loadSSJ(this._settings.currentSSJId)
+    .then(ssjRet => {
+      this._ssj = ssjRet;
+      
+      //
+      // Handle upgrades where we have more tabs in this version
+      // than the previous version when the ssj was saved.
+      //
+      const newTabCapacity = this.noteTitles.length;
+      const oldTabCapacity = this._ssj.order.length;
+      if (newTabCapacity > oldTabCapacity) {
+        if(D)console.log('*** Updating to accomodate more tabs');
+        const startIndex = newTabCapacity - oldTabCapacity - 1;
+        for (let i = startIndex; i < newTabCapacity; i++) {
+          const slideId = uuidv4();
+          this._ssj.order.push(slideId);
+          this._ssj.slides[slideId] = { title: this.noteTitles[i], text: null };
+        }
+      }
+      else if (newTabCapacity < oldTabCapacity) {
+        if(D)console.log('*** Updating to accomodate fewer tabs by deleting data');
+        const slidesToDelete = oldTabCapacity - newTabCapacity;
+        for (let i = 0; i < slidesToDelete; i++) {
+          const length = this._ssj.order.length;
+          const slideId = this._ssj.order[length - 1];
+          this._ssj.slides.delete(slideId);
+          this._ssj.order.pop();
+        }
+      }
+    });
+  }
+  
+  /**
+   * Initializes the application from the OOBE flow
+   */
+  initializeOOBE() {
+    //
+    // This is the OOBE workflow
+    //
+    this._settings.currentSSJId = uuidv4();
+    this._ssj = new SlideShowJSON(
+      this._settings.currentSSJId, 
+      null, 
+      null, 
+      SlideShowJSON.SlideShowJSONVersion);
+    
+    this.noteTitles.forEach(noteTitle => {
+      const slideId = uuidv4();
+      this._ssj.order.push(slideId);
+      this._ssj.slides[slideId] = { title: noteTitle, text: null };
+    });
+
+    return this._database.saveOOBE(this._settings, this._ssj);
+  }
+  
+  /**
+   * Populates the textarea elements with the data retrieved
+   * from the database.
+   */
+  populateTextareas() {
+    this.noteTitles.forEach((noteTitle, index) => {
+      const text = this._ssj.getSlideJSONByIndex(index).text;
+      this.$[`textArea${index}`].value = text;
+    });
+  }
+  
+  
+  
+  /**
+   * Property getters/setters
+   */
   
   get appReady() {
     return this.state.appReady;
@@ -186,14 +235,11 @@ class HomePage extends ElementBase {
   set noteTitles(noteTitles) {
     this.setState({noteTitles});
   }
-  
-  //
-  // Force a render cycle
-  //
-  forceUpdate() {
-    this.setState({forceUpdateIndex: this.state.forceUpdateIndex + 1});
-  }
-  
+
+  /**
+   * Rendering
+   */
+
   [symbols.render]() {
     if (super[symbols.render]) { super[symbols.render](); }
     

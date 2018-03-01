@@ -2,6 +2,39 @@ import uuidv4 from './Uuidv4.js';
 
 const SSJ_VERSION = 1;
 
+/**
+ * SlideShowJSON is a class pattern we use for application state concerning
+ * data displayed in elements such as tabs and carousels (the latter being
+ * the origin of the notion of a "slide").
+ * 
+ * The SlideShowJSON class loosely manages a schema through its exposed
+ * properties and methods, and uses a JSON object as a backing-store, so
+ * to speak. The JSON is intended to be private and managed by the class.
+ * It is the JSON object that is serialized for persistence such as to
+ * an IndexedDB instance.
+ * 
+ * In this app, SlideShowJSON has the following structure:
+ *  {
+ *    id: {string}
+ *    title: {string}
+ *    description: {string}
+ *    version: {number}
+ *    order: string[]  // Ordered array of slideIds
+ *    slides: {
+ *      slideId: { title: {string}, text: {string} },
+ *      ...
+ *    }
+ *  }
+ * 
+ * The order value holds an array of slideIds, ordered to correspond
+ * to the slide's order in the UI element.
+ * 
+ * The slideId is a key into an associative array holding each of the
+ * slide's data. In this case, we store a slide's title and its text content.
+ * The title in this app corresponds to a Tab name, and the text
+ * corresponds to the user's typed text in each textarea element.
+ */
+
 class SlideShowJSON {
   constructor(id, title, description, version) {
     this._json = {
@@ -39,13 +72,6 @@ class SlideShowJSON {
     return JSON.parse(JSON.stringify(this.json));
   }
   
-  // Performs database operations.
-  // Returns a promise.
-  updateTitleAndDescription(title, description, database) {
-    const obj = {title, description};
-    this.json = Object.assign(this.json, obj);
-  }
-  
   get title() {
     return this._json.title;
   }
@@ -76,18 +102,6 @@ class SlideShowJSON {
     this._json.slides = value;
   }
 
-  //
-  // Saves the SSJ to the database
-  //
-  // Parameters:
-  // -- database: the IndexedDB reference
-  //
-  // Returns a promise.
-  //
-  save(database) {
-    return database.saveSSJJ(this);
-  }
-    
   indexFromSlideId(slideId) {
     return this.order.indexOf(slideId);
   }
