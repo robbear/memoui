@@ -1,6 +1,7 @@
 import ElementBase from 'elix/src/ElementBase.js';
 import 'elix/src/Drawer.js';
 import 'elix/src/Tabs.js';
+import TouchSwipeMixin from 'elix/src/TouchSwipeMixin.js';
 import * as symbols from 'elix/src/symbols.js';
 import { merge } from 'elix/src/updates.js';
 import Database from '../utilities/Database.js';
@@ -15,7 +16,13 @@ const SAVE_INTERVAL = 2000; // 2 seconds
  */
 const D = false;
 
-class HomePage extends ElementBase {
+const Base =
+  TouchSwipeMixin(
+    ElementBase
+  );
+
+
+class HomePage extends Base {
 
   constructor() {
     super();
@@ -267,6 +274,18 @@ class HomePage extends ElementBase {
       const text = this._ssj.getSlideJSONByIndex(index).text;
       this.$[`textArea${index}`].value = text;
     });
+  }
+  
+  /**
+   * TouchSwipeMixin methods
+   */
+  
+  [symbols.swipeLeft]() {
+    console.log('swipe left!');
+  }
+  
+  [symbols.swipeRight]() {
+    console.log('swipe right!');
   }
   
   
