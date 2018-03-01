@@ -7,7 +7,7 @@ import SlideShowJSON from '../utilities/SlideShowJSON.js';
 import uuidv4 from '../utilities/Uuidv4.js';
 
 const SSJ_VERSION = 1;
-const SAVE_INTERVAL = 3000; // 3 seconds
+const SAVE_INTERVAL = 2000; // 2 seconds
 
 /**
  * Set to false to turn off diagnostics output
@@ -32,7 +32,7 @@ class HomePage extends ElementBase {
       tabTitles: ['Home', 'Work', 'Misc']
     });
   }
-
+  
   componentDidMount() {
     if (super.componentDidMount) { super.componentDidMount(); }
 
@@ -41,8 +41,8 @@ class HomePage extends ElementBase {
       console.error(`Call from initializeFromDatabase leaked error: ${error}`);
       this.appReady = false;
     });
-    
-    this.$.tabs.addEventListener('keyup', event => {
+
+    this.$.tabs.addEventListener('input', event => {
       const target = event.target;
       
       if (target.classList.contains('textarea')) {
