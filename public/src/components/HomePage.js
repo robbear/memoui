@@ -49,6 +49,32 @@ class HomePage extends Base {
       console.error(`Call from initializeFromDatabase leaked error: ${error}`);
       this.appReady = false;
     });
+    
+    //
+    // Block propagation of pointerdown at the tabs element so that
+    // only the container area of the HomePage element will get these
+    // events in order to manipulate the drawer. Mobile styles allow
+    // for a small gutter on the far left to trigger the drawer.
+    //
+    if ('PointerEvent' in window) {
+      this.$.tabs.addEventListener('pointerdown', event => {
+        event.stopPropagation();
+      });
+
+      this.addEventListener('pointerdown', event => {
+        this.$.drawer.open();
+      });
+    }
+    else {
+      // Pointer events not supported -- listen to older touch events.
+      this.$.tabs.addEventListener('touchstart', event => {
+        event.stopPropagation();
+      });
+      
+      this.addEventListener('touchstart', event => {
+        this.$.drawer.open();
+      });  
+    }
 
     this.$.tabs.addEventListener('input', event => {
       const target = event.target;
@@ -58,10 +84,6 @@ class HomePage extends Base {
         slide.text = target.value;
         this._dirty = true;
       }
-    });
-    
-    this.$.tabs.addEventListener('dblclick', event => {
-      this.$.drawer.open();
     });
     
     this.$.tabs.addEventListener('selected-index-changed', event => {
@@ -362,6 +384,10 @@ class HomePage extends Base {
       <style>
         :host {
         }
+        #container {
+          background-color: #eee;
+          height: 100%;
+        }
         #drawer div {
           margin: 2em;
         }
@@ -374,6 +400,9 @@ class HomePage extends Base {
         .tabTitle {
           padding: 20px;
         }
+        #tabs {
+          margin-left: 5px;
+        }
         .toolbarTabs {
           background: #eee;
           color: gray;
@@ -382,6 +411,7 @@ class HomePage extends Base {
           height: 100%;
         }
         .textarea {
+          border: none;
           padding: 10px;
           align-items: center;
           background: initial;
@@ -394,13 +424,15 @@ class HomePage extends Base {
           resize: none;
         }
       </style>
-      <elix-tabs id="tabs" class="toolbarTabs" tab-position="bottom" tab-align="stretch">
+      <div id="container">
+        <elix-tabs id="tabs" class="toolbarTabs" tab-position="bottom" tab-align="stretch">
+    
+          ${toolbarHTML}
   
-        ${toolbarHTML}
-
-        ${textAreaHTML}
-        
-      </elix-tabs>
+          ${textAreaHTML}
+          
+        </elix-tabs>
+      </div>
       <elix-drawer id="drawer" class="showDrawer">
         <div>
           <h3>Memoui</h3>
