@@ -395,7 +395,11 @@ class HomePage extends Base {
           list-style: none;
         }
         #drawer li {
-          margin: 10px 10px;
+          margin: 2em 0;
+        }
+        #drawer a {
+          text-decoration: none;
+          color: #888;
         }
         .tabTitle {
           padding: 20px;

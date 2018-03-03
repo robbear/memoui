@@ -64,13 +64,27 @@ class VersionPage extends ElementBase {
   
   get [symbols.template]() {
     return `
-      <div>
+      <style>
+        a {
+          text-decoration: none;
+          color: #888;
+        }
+        #container {
+          margin-top: 40px;
+          text-align: center;
+        }
+        #link {
+          margin-top: 40px;
+        }
+      </style>
+      <div id="container">
+        <h3>Memoui</h2>
         <div id="build"></div>
         <div id="version"></div>
         <div id="swVersion"></div>
-      </div>
-      <div>
-        <a href="/">Back to the application</a>
+        <div id="link">
+          <a href="/">Back</a>
+        </div>
       </div>
     `;
   }
