@@ -56,7 +56,7 @@ export default class AppShell extends Component {
           <meta name="description" content="Memoui is an offline-capable scratch pad progressive web application using Elix.org web components."/>
           <title>{titleBar}</title>
           <script dangerouslySetInnerHTML={{__html: polyfillLoader}} charSet="UTF-8"/>
-          <link rel="shortcut icon" href={`${staticPath}/images/favicon.ico`}/>
+          <link rel="shortcut icon" href={`${staticPath}/images/memoui-32x32.png`}/>
           <link rel="stylesheet" href={`${staticPath}/main.css`}/>
           <link rel="manifest" href={`${staticPath}/manifest.json`} />
           <script src={`${staticPath}/build/${clientFile}`}></script>
