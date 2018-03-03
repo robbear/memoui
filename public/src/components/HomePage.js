@@ -410,13 +410,9 @@ class HomePage extends ElementBase {
         }
         .textarea {
           border: none;
-          padding: 10px;
-          align-items: center;
-          background: initial;
-          color: initial;
+          padding: 1.5em;
           display: flex;
           flex: 1;
-          justify-content: center;
           font-family: inherit;
           font-size: inherit;
           resize: none;
