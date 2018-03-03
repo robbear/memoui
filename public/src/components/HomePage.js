@@ -44,32 +44,11 @@ class HomePage extends ElementBase {
       this.appReady = false;
     });
     
-    //
-    // Block propagation of pointerdown at the tabs element so that
-    // only the container area of the HomePage element will get these
-    // events in order to manipulate the drawer. Mobile styles allow
-    // for a small gutter on the far left to trigger the drawer.
-    //
-    if ('PointerEvent' in window) {
-      this.$.tabs.addEventListener('pointerdown', event => {
-        event.stopPropagation();
-      });
-
-      this.addEventListener('pointerdown', event => {
-        this.$.drawer.open();
-      });
-    }
-    else {
-      // Pointer events not supported -- listen to older touch events.
-      this.$.tabs.addEventListener('touchstart', event => {
-        event.stopPropagation();
-      });
-      
-      this.addEventListener('touchstart', event => {
-        this.$.drawer.open();
-      });  
-    }
-
+    this.$.header.addEventListener('dblclick', event => {
+      this.$.drawer.open();
+      event.stopPropagation();
+    });
+    
     this.$.tabs.addEventListener('input', event => {
       const target = event.target;
       
@@ -381,6 +360,8 @@ class HomePage extends ElementBase {
         #container {
           background-color: #eee;
           height: 100%;
+          display: flex;
+          flex-direction: column;
         }
         #drawer div {
           margin: 2em;
@@ -398,9 +379,6 @@ class HomePage extends ElementBase {
         .tabTitle {
           padding: 20px;
         }
-        #tabs {
-          margin-left: 5px;
-        }
         .toolbarTabs {
           background: #eee;
           color: gray;
@@ -417,8 +395,20 @@ class HomePage extends ElementBase {
           font-size: inherit;
           resize: none;
         }
+        #header {
+          display: flex;
+          flex: 0 0 3em;
+          flex-direction: column;
+          background-color: dodgerblue;
+          color: white;
+          align-items: center;
+          justify-content: center;
+        }
       </style>
       <div id="container">
+        <div id="header">
+          <h1>Memoui</h1>
+        </div>
         <elix-tabs id="tabs" class="toolbarTabs" tab-position="bottom" tab-align="stretch">
     
           ${toolbarHTML}
