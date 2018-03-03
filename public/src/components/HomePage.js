@@ -1,7 +1,6 @@
 import ElementBase from 'elix/src/ElementBase.js';
 import 'elix/src/Drawer.js';
 import 'elix/src/Tabs.js';
-import TouchSwipeMixin from 'elix/src/TouchSwipeMixin.js';
 import * as symbols from 'elix/src/symbols.js';
 import { merge } from 'elix/src/updates.js';
 import Database from '../utilities/Database.js';
@@ -16,13 +15,8 @@ const SAVE_INTERVAL = 2000; // 2 seconds
  */
 const D = false;
 
-const Base =
-  TouchSwipeMixin(
-    ElementBase
-  );
 
-
-class HomePage extends Base {
+class HomePage extends ElementBase {
 
   constructor() {
     super();
