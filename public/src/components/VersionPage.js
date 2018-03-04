@@ -78,7 +78,7 @@ class VersionPage extends ElementBase {
         }
       </style>
       <div id="container">
-        <h3>Memoui</h2>
+        <h3>Memoui</h3>
         <div id="build"></div>
         <div id="version"></div>
         <div id="swVersion"></div>

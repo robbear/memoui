@@ -32,12 +32,17 @@ class HomePage extends ElementBase {
     return Object.assign({}, super.defaultState, {
       appReady: false,
       currentTabIndex: 0,
-      tabTitles: ['Home', 'Work', 'Misc']
+      tabTitles: ['Home', 'Work', 'Misc'],
+      build: '',
+      version: '',
+      serviceWorkerVersion: ''
     });
   }
   
   componentDidMount() {
     if (super.componentDidMount) { super.componentDidMount(); }
+
+    getServiceWorkerVersion(this);
 
     this.initializeFromDatabase()
     .catch(error => {
@@ -87,32 +92,6 @@ class HomePage extends ElementBase {
       }
     });
 
-    //
-    // Watch for clicks on the Share link in the drawer
-    //
-    this.$.drawer.addEventListener('click', event => {
-      const target = event.target;
-      
-      if (target.id === 'shareLink') {
-        const text = this._ssj.getSlideJSONByIndex(this.currentTabIndex).text;
-        
-        if (text && text.length > 0 && window.navigator.share) {
-  
-          window.navigator.share({
-            title: 'A note from Memoui',
-            text: text,
-            url: 'https://memoui.com'
-          })
-          .catch((error) => {
-            console.error(`Error sharing: ${error}`);
-          });      
-        
-          event.preventDefault();
-          event.stopPropagation();
-        }
-      }
-    });
-    
   }
 
   /**
@@ -290,20 +269,7 @@ class HomePage extends ElementBase {
     });
   }
   
-  /**
-   * TouchSwipeMixin methods
-   */
-  
-  [symbols.swipeLeft]() {
-    console.log('swipe left!');
-  }
-  
-  [symbols.swipeRight]() {
-    console.log('swipe right!');
-  }
-  
-  
-  
+
   /**
    * Property getters/setters
    */
@@ -335,9 +301,21 @@ class HomePage extends ElementBase {
     try {
       json = JSON.parse(jsonString);
       this._staticPath = `/static/${json.build}`;
+      this.setState({
+        build: json.build,
+        version: json.version
+      });
     }
     catch(error) {}
   }
+
+  get serviceWorkerVersion() {
+    return this.state.serviceWorkerVersion;
+  }
+  set serviceWorkerVersion(serviceWorkerVersion) {
+    this.setState({serviceWorkerVersion});
+  }
+
 
   /**
    * Rendering
@@ -355,7 +333,6 @@ class HomePage extends ElementBase {
   
   get updates() {
     const canShare = window.navigator.share ? true : false;
-    console.log(`canShare=${canShare}`);
 
     return merge(super.updates, {
       $: {
@@ -363,6 +340,15 @@ class HomePage extends ElementBase {
           style: {
             visibility: canShare ? '' : 'hidden'
           }
+        },
+        build: {
+          innerHTML: `Build: ${this.state.build}`
+        },
+        version: {
+          innerHTML: `Version: ${this.state.version}`
+        },
+        swVersion: {
+          innerHTML: `SW Version: <span>${this.state.serviceWorkerVersion}</span>`
         }
       }
     });
@@ -391,17 +377,10 @@ class HomePage extends ElementBase {
           flex-direction: column;
         }
         #drawer div {
-          margin: 2em;
+          font-size: 12px;
         }
-        #drawer ul {
-          list-style: none;
-        }
-        #drawer li {
-          margin: 2em 0;
-        }
-        #drawer a {
-          text-decoration: none;
-          color: #888;
+        #drawerContainer {
+          padding: 1em;
         }
         .tabTitle {
           padding: 20px;
@@ -457,22 +436,46 @@ class HomePage extends ElementBase {
         </elix-tabs>
       </div>
       <elix-drawer id="drawer" class="showDrawer">
-        <div>
+        <div id="drawerContainer">
           <h3>Memoui</h3>
-          <h4>by Component Kitchen</h4>
-          <ul>
-            <li id="shareItem">
-              <a href="#" id="shareLink">Share</h>
-            </li>
-            <li>
-              <a href="/version">Version</a>
-            </li>
-          </ul>
+          <div>
+            <p style="width: 150px;">
+              A progressive web application demonstration
+              by Component Kitchen
+            </p>
+          </div>
+          <div id="build"></div>
+          <div id="version"></div>
+          <div id="swVersion"></div>
         </div>
       </elix-drawer>
     `;
   }
   
+}
+
+function getServiceWorkerVersion(elem) {
+  if (!('serviceWorker' in window.navigator)) {
+    return elem.serviceWorkerVersion = '';
+  }
+  
+  let messageChannel = new window.MessageChannel();
+  messageChannel.port1.onmessage = function(event) {
+    var versionString = event.data;
+    if (versionString.indexOf('v') === 0) {
+      versionString = versionString.substring(1);
+    }
+    
+    elem.serviceWorkerVersion = versionString;
+  };
+  
+  if (window.navigator.serviceWorker.controller === undefined || window.navigator.serviceWorker.controller == null) {
+    console.log('Service worker controller not defined, so no message sent back to client');
+    return;
+  }
+  else {
+    window.navigator.serviceWorker.controller.postMessage({action: 'GET_VERSION'}, [messageChannel.port2]);
+  }
 }
 
 window.customElements.define('memoui-home-page', HomePage);
