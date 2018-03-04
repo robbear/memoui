@@ -25,6 +25,7 @@ class HomePage extends ElementBase {
     this._ssj = null;
     this._database = null;
     this._dirty = false;
+    this._staticPath = '';
   }
   
   get defaultState() {
@@ -44,11 +45,29 @@ class HomePage extends ElementBase {
       this.appReady = false;
     });
     
-    this.$.header.addEventListener('dblclick', event => {
+    this.$.menu.addEventListener('click', event => {
       this.$.drawer.open();
       event.stopPropagation();
     });
     
+    this.$.share.addEventListener('click', event => {
+      const text = this._ssj.getSlideJSONByIndex(this.currentTabIndex).text;
+      
+      if (text && text.length > 0 && window.navigator.share) {
+  
+        window.navigator.share({
+          title: 'A note from Memoui',
+          text: text,
+          url: 'https://memoui.com'
+        })
+        .catch((error) => {
+          console.error(`Error sharing: ${error}`);
+        });
+      }
+      
+      event.stopPropagation();
+    });
+
     this.$.tabs.addEventListener('input', event => {
       const target = event.target;
       
@@ -310,6 +329,16 @@ class HomePage extends ElementBase {
     this.setState({tabTitles});
   }
 
+  set props(jsonString) {
+    let json = {};
+    
+    try {
+      json = JSON.parse(jsonString);
+      this._staticPath = `/static/${json.build}`;
+    }
+    catch(error) {}
+  }
+
   /**
    * Rendering
    */
@@ -325,17 +354,15 @@ class HomePage extends ElementBase {
   }
   
   get updates() {
-    const canShare = window.share ? true : false;
+    const canShare = window.navigator.share ? true : false;
+    console.log(`canShare=${canShare}`);
 
-    // BUGBUG - How do we do this?
     return merge(super.updates, {
       $: {
-        drawer: {
-            shareItem: {
-              styles: {
-                display: canShare ? '' : 'none'
-              }
-            }
+        share: {
+          style: {
+            visibility: canShare ? '' : 'hidden'
+          }
         }
       }
     });
@@ -398,16 +425,28 @@ class HomePage extends ElementBase {
         #header {
           display: flex;
           flex: 0 0 3em;
-          flex-direction: column;
+          flex-direction: row;
           background-color: dodgerblue;
           color: white;
           align-items: center;
-          justify-content: center;
+          justify-content: space-between;
+        }
+        #header img {
+          width: 1.5em;
+          height: 1.5em;
+        }
+        #menu {
+          margin-left: 1.5em;
+        }
+        #share {
+          margin-right: 1.5em;
         }
       </style>
       <div id="container">
         <div id="header">
+          <img id="menu" src="${this._staticPath}/images/menu.png" />
           <h1>Memoui</h1>
+          <img id="share" src="${this._staticPath}/images/share.png" />
         </div>
         <elix-tabs id="tabs" class="toolbarTabs" tab-position="bottom" tab-align="stretch">
     
