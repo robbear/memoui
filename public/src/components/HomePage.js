@@ -205,6 +205,15 @@ class HomePage extends ElementBase {
     //
     return this._database.loadSSJ(this._settings.currentSSJId)
     .then(ssjRet => {
+      if (SlideShowJSON.validate(ssjRet)) {
+        return Promise.resolve(ssjRet);
+      }
+      
+      alert('We apologize, but we can no longer retrieve your saved data.');
+      
+      // TO DO: tear down the database and force the OOBE path
+    })
+    .then(ssjRet => {
       this._ssj = ssjRet;
       
       //

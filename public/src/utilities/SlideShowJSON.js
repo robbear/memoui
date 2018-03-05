@@ -59,6 +59,15 @@ class SlideShowJSON {
     return ssj;
   }
   
+  /**
+   * Validates whether the supplied json is structurally correct
+   * SSJ data.
+   */
+  static validate(json) {
+    // BUGBUG: NYI
+    return true;
+  }
+  
   static get SlideShowJSONVersion() {
     return SSJ_VERSION;
   }
