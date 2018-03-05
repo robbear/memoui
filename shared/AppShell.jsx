@@ -53,6 +53,7 @@ export default class AppShell extends Component {
           <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
           <meta name="theme-color" content="#1e90ff"/>
           <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+          <meta name="apple-mobile-web-app-capable" content="yes"/>
           <meta name="description" content="Memoui is an offline-capable scratch pad progressive web application using Elix.org web components."/>
           <title>{titleBar}</title>
           <script dangerouslySetInnerHTML={{__html: polyfillLoader}} charSet="UTF-8"/>
