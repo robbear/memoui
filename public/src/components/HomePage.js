@@ -9,6 +9,7 @@ import uuidv4 from '../utilities/Uuidv4.js';
 
 const SSJ_VERSION = 1;
 const SAVE_INTERVAL = 2000; // 2 seconds
+const VERSION_STRING_LENGTH = 7;
 
 /**
  * Set to false to turn off diagnostics output
@@ -333,6 +334,8 @@ class HomePage extends ElementBase {
   
   get updates() {
     const canShare = window.navigator.share ? true : false;
+    let version = this.state.version;
+    version = version ? version.substring(0, VERSION_STRING_LENGTH) : '';
 
     return merge(super.updates, {
       $: {
@@ -345,10 +348,10 @@ class HomePage extends ElementBase {
           innerHTML: `Build: ${this.state.build}`
         },
         version: {
-          innerHTML: `Version: ${this.state.version}`
+          innerHTML: `Version: ${version}`
         },
         swVersion: {
-          innerHTML: `SW Version: <span>${this.state.serviceWorkerVersion}</span>`
+          innerHTML: `SW Version: ${this.state.serviceWorkerVersion}`
         }
       }
     });

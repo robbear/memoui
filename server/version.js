@@ -15,7 +15,7 @@ module.exports = {
     // In the case of no timestamp.txt, assume we're in a dev build environment
     // where the dev wants to use the repository's static path, public/src
     const defaultTimestamp = 'src';
-    const defaultVersion = 'undefined';
+    const defaultVersion = '';
     
     let result = {};
     return readFileAsync('./timestamp.txt', 'utf-8')

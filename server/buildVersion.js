@@ -30,7 +30,7 @@ function generateTimeStamp() {
 function buildVersion() {
   let sourceVersion = process.env.SOURCE_VERSION;
   if (!sourceVersion) {
-    sourceVersion = 'undefined';
+    sourceVersion = '';
   }
   
   const timeStamp = generateTimeStamp();
