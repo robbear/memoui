@@ -10,6 +10,7 @@ import uuidv4 from '../utilities/Uuidv4.js';
 const SSJ_VERSION = 1;
 const SAVE_INTERVAL = 2000; // 2 seconds
 const VERSION_STRING_LENGTH = 7;
+const DESKTOP_MEDIA = 'screen and (min-width: 800px)'
 
 /**
  * Set to false to turn off diagnostics output
@@ -345,12 +346,18 @@ class HomePage extends ElementBase {
     const canShare = window.navigator.share ? true : false;
     let version = this.state.version;
     version = version ? version.substring(0, VERSION_STRING_LENGTH) : '';
+    const isDesktop = window.matchMedia(DESKTOP_MEDIA).matches;
 
     return merge(super.updates, {
       $: {
         share: {
           style: {
             visibility: canShare ? '' : 'hidden'
+          }
+        },
+        menu: {
+          style: {
+            visibility: isDesktop ? 'hidden' : ''
           }
         },
         build: {
@@ -383,7 +390,6 @@ class HomePage extends ElementBase {
         :host {
         }
         #container {
-          background-color: #eee;
           height: 100%;
           display: flex;
           flex-direction: column;
@@ -432,8 +438,33 @@ class HomePage extends ElementBase {
         #share {
           margin-right: 1.5em;
         }
+        #desktopContent {
+          display: none;
+        }
+        @media ${DESKTOP_MEDIA} {
+          #desktopContent {
+            display: flex;
+            flex: 0 1 9em;
+            flex-direction: column;
+            padding: 1.5em;
+            font-size: 1.25em;
+          }
+        }
       </style>
       <div id="container">
+        <div id="desktopContent">
+          <p>
+          Memoui is a progressive web application demonstration making use
+          of web components, a service worker, IndexedDB, and other web
+          application development patterns. It is best experienced on
+          mobile devices.
+          </p>
+          <p>
+          Memoui is built with <a href="https://elix.org">Elix</a>, a library of 
+          high-quality web components and mixins developed by 
+          <a href="https://component.kitchen">Component Kitchen</a>.
+          </p>
+        </div>
         <div id="header">
           <img id="menu" src="${this._staticPath}/images/menu.png" />
           <h1>Memoui</h1>
