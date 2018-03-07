@@ -54,10 +54,12 @@ export default class AppShell extends Component {
           <meta name="theme-color" content="#1e90ff"/>
           <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
           <meta name="apple-mobile-web-app-capable" content="yes"/>
+          <meta name="apple-mobile-web-app-title" content="Memoui"/>
           <meta name="description" content="Memoui is an offline-capable scratch pad progressive web application using Elix.org web components."/>
           <title>{titleBar}</title>
           <script dangerouslySetInnerHTML={{__html: polyfillLoader}} charSet="UTF-8"/>
           <link rel="shortcut icon" href={`${staticPath}/images/memoui-32x32.png`}/>
+          <link rel="apple-touch-icon" href={`${staticPath}/images/memoui-512x512.png`}/>
           <link rel="stylesheet" href={`${staticPath}/main.css`}/>
           <link rel="manifest" href={`${staticPath}/manifest.json`} />
           <script src={`${staticPath}/build/${clientFile}`}></script>
