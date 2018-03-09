@@ -9,6 +9,7 @@ body {
   height: 100%;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 15px;
+  overflow: hidden;
 }
 
 #root {
@@ -21,9 +22,8 @@ body {
  */
 @media screen and (min-width: 800px) {
 
-  #root {
-    width: 65%;
-    margin: 0 auto;
+  body {
+    overflow: auto;
   }
 
 }

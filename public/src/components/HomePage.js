@@ -448,23 +448,31 @@ class HomePage extends ElementBase {
             flex-direction: column;
             padding: 1.5em;
             font-size: 1.25em;
+            width: 60%;
+            margin: 0 auto;
+          }
+          #container {
+            width: 450px;
+            height: 700px;
+            margin: 0 auto;
           }
         }
       </style>
+      <div id="desktopContent">
+        <h2>Memoui</h2>
+        <p>
+        Memoui is a progressive web application demonstration making use
+        of web components, a service worker, IndexedDB, and other web
+        application development patterns. It is best experienced on
+        mobile devices. Memoui is built with
+        <a href="https://elix.org">Elix</a>, a library of 
+        high-quality web components and mixins developed by 
+        <a href="https://component.kitchen">Component Kitchen</a>.
+        What you see below is roughly how the application appears on a mobile 
+        device. Give it a try on your phone, or if you like, here.
+        </p>
+      </div>
       <div id="container">
-        <div id="desktopContent">
-          <p>
-          Memoui is a progressive web application demonstration making use
-          of web components, a service worker, IndexedDB, and other web
-          application development patterns. It is best experienced on
-          mobile devices.
-          </p>
-          <p>
-          Memoui is built with <a href="https://elix.org">Elix</a>, a library of 
-          high-quality web components and mixins developed by 
-          <a href="https://component.kitchen">Component Kitchen</a>.
-          </p>
-        </div>
         <div id="header">
           <img id="menu" src="${this._staticPath}/images/menu.png" />
           <h1>Memoui</h1>
