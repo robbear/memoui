@@ -1,11 +1,11 @@
-import ElementBase from 'elix/src/ElementBase.js';
+import ReactiveElement from 'elix/src/ReactiveElement.js';
 import * as symbols from 'elix/src/symbols.js';
 import { merge } from 'elix/src/updates.js';
 
 /* global navigator */
 /* global MessageChannel */
 
-class VersionPage extends ElementBase {
+class VersionPage extends ReactiveElement {
 
   componentDidMount() {
     if (super.componentDidMount) { super.componentDidMount(); }

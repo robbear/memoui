@@ -1,4 +1,4 @@
-import ElementBase from 'elix/src/ElementBase.js';
+import ReactiveElement from 'elix/src/ReactiveElement.js';
 import 'elix/src/Drawer.js';
 import 'elix/src/Tabs.js';
 import * as symbols from 'elix/src/symbols.js';
@@ -18,7 +18,7 @@ const DESKTOP_MEDIA = 'screen and (min-width: 800px)'
 const D = false;
 
 
-class HomePage extends ElementBase {
+class HomePage extends ReactiveElement {
 
   constructor() {
     super();
@@ -380,7 +380,7 @@ class HomePage extends ElementBase {
     this.tabTitles.forEach((tabTitle, index) => {
       textAreaHTML += `<textarea id="textArea${index}"" class="textarea" placeholder="Just start typing. Your text will be saved." autofocus></textarea>`;
       toolbarHTML += `
-        <memoui-toolbar-tab slot="tabButtons" aria-label="${tabTitle}">
+        <memoui-toolbar-tab slot="proxy" aria-label="${tabTitle}">
           <div class="tabTitle">${tabTitle}</div>
         </memoui-toolbar-tab>`;
     });
@@ -478,7 +478,7 @@ class HomePage extends ElementBase {
           <h1>Memoui</h1>
           <img id="share" src="${this._staticPath}/images/share.png" />
         </div>
-        <elix-tabs id="tabs" class="toolbarTabs" tab-position="bottom" tab-align="stretch">
+        <elix-tabs id="tabs" class="toolbarTabs" proxy-list-position="bottom" tab-align="stretch">
     
           ${toolbarHTML}
   

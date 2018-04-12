@@ -1,8 +1,8 @@
-import ElementBase from 'elix/src/ElementBase.js';
+import ReactiveElement from 'elix/src/ReactiveElement.js';
 import * as symbols from 'elix/src/symbols.js';
 import { merge } from 'elix/src/updates.js';
 
-class ErrorPage extends ElementBase {
+class ErrorPage extends ReactiveElement {
 
   componentDidMount() {
     if (super.componentDidMount) { super.componentDidMount(); }
