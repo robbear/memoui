@@ -1,0 +1,17 @@
+{
+  "name": "Memoui",
+  "version": "1.0.0",
+  "description": "Memoui app",
+  "repository": "git@github.com:robbear/memoui",
+  "author": "Rob Bearman <robbear@hyperfine.com>",
+  "dependencies": {
+    "elix": "2.0.0"
+  },
+  "scripts": {
+    "build": "rm -rf ../build && mkdir -p ../build && cp -r ./ ../build/src"
+  },
+  "engines": {
+    "node": "10.16.0",
+    "npm": "6.9.0"
+  }
+}

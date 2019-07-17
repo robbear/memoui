@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-1383268-3"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-1383268-3');
+    </script>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+    <meta name="theme-color" content="#1e90ff"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-title" content="Memoui"/>
+    <meta name="description" content="Memoui is an offline-capable scratch pad progressive web application using Elix.org web components."/>
+    <title>Memoui</title>
+    <link rel="shortcut icon" href="images/memoui-32x32.png"/>
+    <link rel="apple-touch-icon" href="images/memoui-512x512.png"/>
+    <link rel="stylesheet" href="main.css"/>
+    <link rel="manifest" href="manifest.json" />
+  </head>
+  <body>
+    <noscript>
+      This application requires JavaScript in order to run on your
+      browser. Please configure your browser to allow JavaScript.
+    </noscript>
+    <div id="root">
+      <memoui-home-page>
+      </memoui-home-page>
+    </div>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('service-worker.js', {scope: 'src'});
+        });
+      }
+    </script>
+    <script type="module" src="./components/HomePage.js"></script>
+    <script type="module" src="./components/ToolbarTab.js"></script>
+   </body>
+</html>
